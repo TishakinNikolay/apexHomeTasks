@@ -1,0 +1,34 @@
+public class OnCompanyUpdateTriggerUtils {
+    public static void updateUsersInCompany(List<company__c> companies) {
+        Set<Id> userIdeis = getUsersIdies(companies);
+        Map<Id, Users__c> users = querryUsers(userIdeis);
+        executeUpdate(users);
+    }
+    private static Set<Id> getUsersIdies(List<company__c> companies) {
+        Set<Id> result = new Set<Id>();
+        for(company__c curCompany : companies) {
+           if(curCompany.user_id__c != null) {
+              result.add(curCompany.user_id__c);
+            }
+        }
+        return result;
+    }
+    private static Map<Id, Users__c> querryUsers(Set<Id> idies) {
+        return new Map<Id, Users__c>([
+            select Id, lastChildUpdate__c
+            from Users__c
+            where Id in : idies
+            ]);
+    }
+    private static void executeUpdate(Map<Id, Users__c> users) {
+        List<Users__c> usersToUpdate = new List<Users__c>();
+        for (Id userId : users.keySet()) {
+        	Users__c curUser = users.get(userId);
+        	curUser.lastChildUpdate__c = DateTime.now();
+            usersToUpdate.add(curUser);
+       	 }
+        if(usersToUpdate.size() > 0) {
+            update usersToUpdate;
+        }
+    }
+}

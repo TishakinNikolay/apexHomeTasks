@@ -1,0 +1,3 @@
+trigger OnCompanyUpdateTrigger on company__c (before update) {
+  OnCompanyUpdateTriggerUtils.updateUsersInCompany(Trigger.new);
+}

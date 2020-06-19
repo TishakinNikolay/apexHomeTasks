@@ -1,0 +1,3 @@
+trigger OnUserInsertTrigger on Users__c (before insert) {
+    OnUserInsertTriggerUtils.injectDateToUsers(Trigger.New);
+}

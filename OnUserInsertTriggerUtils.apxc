@@ -1,0 +1,7 @@
+public class OnUserInsertTriggerUtils {
+    public static void injectDateToUsers(List<Users__c> users) {
+        for(Users__c user : users) {
+            user.creatingDate__c = Date.today();
+        }
+    }
+}
