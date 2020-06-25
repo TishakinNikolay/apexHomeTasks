@@ -1,0 +1,46 @@
+public class beforeInsertAnimalTriggerUtils {
+  @Future(callout=true)
+  public static void getAnimalsData(Set<Id> idies) {
+      Http http = new Http();
+      Map<String,AnimalModel> models = new Map<String,AnimalModel>();
+      List<animal__c> customAnimals = [SELECT Name, says__c, eats__c, externalId__c
+                                         FROM animal__c
+                                         WHERE Id IN :idies
+                                         AND externalId__c != null];
+      for(animal__c animal : customAnimals) {
+          String externalId = animal.externalId__c;
+          if(models.keySet().contains(externalId) == false) { // check if models already has a model with given external id
+            AnimalModel model = getModelById(externalId,http);
+            models.put(externalId,model);
+          }
+          convertToCustom(models.get(externalId),animal);
+      }
+      update customAnimals;
+	}
+  public static AnimalModel getModelById(String identifer, Http http) {
+    HttpResponse response = http.send(getRequestById(identifer));
+    AnimalModel model;
+      if(response.getStatusCode() == 200) {
+          String body = response.getBody()
+              .replace('"id"','"id_x"')
+              .replace('{"animal":','')
+              .replace('}}','}'); // Cutting json to deserialize one object
+          model = (AnimalModel)JSON.deserialize(body,AnimalModel.class);
+      } else {
+          throw new CalloutException('bad return status code: ' + response.getStatusCode());
+      }
+      return model;
+  } 
+  public static HttpRequest getRequestById(String identifier) {
+      HttpRequest result = new HttpRequest();
+      String endPoint = 'https://th-apex-http-callout.herokuapp.com/animals/';
+  result.setEndpoint(endPoint + identifier);
+  result.setMethod('GET');
+      return result;
+  }
+  public static void convertToCustom(Animalmodel model, animal__c cusAnimal) {
+          cusAnimal.Name 		= model.name;
+          cusAnimal.says__c		= model.says;
+          cusAnimal.eats__c		= model.eats;
+  }
+}

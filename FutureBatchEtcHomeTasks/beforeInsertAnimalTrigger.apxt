@@ -1,0 +1,3 @@
+trigger beforeInsertAnimalTrigger on animal__c (after insert) {
+  beforeInsertAnimalTriggerUtils.getAnimalsData(Trigger.newMap.keySet());
+}
