@@ -1,0 +1,14 @@
+global class DeleteAnimalsBatchable implements Database.Batchable<sObject>{
+    global final String query = 'SELECT Id FROM animal__C';
+    global Database.QueryLocator start(Database.BatchableContext bc) 
+    {
+        return Database.getQueryLocator(query);
+    }
+    global void execute(Database.BatchableContext BC, List<sObject> scope) {
+        delete scope;
+    }
+    global void finish(Database.BatchableContext BC) {
+        
+    }
+
+}
