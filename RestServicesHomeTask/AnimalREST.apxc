@@ -1,0 +1,30 @@
+@RestResource(urlMapping='/Animal/*')
+global class AnimalREST {
+    @HttpGet
+    global static void getAnimal() {
+        RestRequest request = RestContext.request;
+        String id_x = request.requestURI.substringAfterLast('/');
+        System.debug(id_x);
+        RestResponse response = RestContext.response;
+        response.statusCode = 200;
+        response.responseBody = Blob.valueOf(JSON.serialize([SELECT Id, Name, CreatedById, eats__c, externalId__c, LastModifiedById, OwnerId, says__c
+                FROM animal__c
+               	WHERE externalId__c= :id_x]));
+    }
+    @HttpPost
+    global static String updateAnimal() {
+        RestRequest request = RestContext.request;
+        animal__c animal = new animal__c();
+        String body = request.requestBody.toString();
+        Map<String, Object> fieldsMap = (Map<String, Object>) JSON.deserializeUntyped(body);
+        for(String field : fieldsMap.keySet()) {
+            Object obj = fieldsMap.get(field);
+            if(obj != null) {
+                System.debug(field + ' ' + obj);
+                animal.put(field,obj);
+            }
+        }
+        update animal;
+      return animal.Id;
+    }
+}

@@ -1,0 +1,23 @@
+global class ParseDomainBatchable implements Database.Batchable<sObject> {
+	global final String query = 'SELECT Id, Email, email_domen__c FROM Lead WHERE Email != null';
+    global Database.QueryLocator start(Database.BatchableContext bc) 
+    {
+        return Database.getQueryLocator(query);
+    }
+    global void execute(Database.BatchableContext BC, List<sObject> scope) {
+        for(sObject lead : scope) {
+            String domain = parseDomain(lead.get('Email'));
+            System.debug(domain);
+            lead.put('email_domen__c',domain);
+			System.debug(lead);
+
+        }
+      update scope;                                  
+    }
+    global void finish(Database.BatchableContext BC) {
+        
+    }
+    private String parseDomain(Object email) {
+        return ((String)email).substringAfterLast('@');
+    }
+}
