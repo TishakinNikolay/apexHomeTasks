@@ -1,0 +1,41 @@
+<aura:component controller="AnimalController" implements="force:hasRecordId,flexipage:availableForAllPageTypes">
+    <aura:attribute name="recordId" type="Id"/>
+    <aura:attribute name="filterValue" type="String"/>
+    <aura:attribute name="similarProperties" type="Object[]"/>
+    <aura:attribute name="data" type="Object"/>
+    <aura:attribute name="columns" type="List"/>
+    <aura:handler name="init" value="{!this}" action="{!c.loadAnimals}"/>
+    <lightning:layout>
+      <lightning:layoutItem padding="around-small" size="6">
+    	<div aria-labelledby="Filter">
+        <!-- BOXED AREA -->
+        <fieldset class="slds-box slds-theme--default slds-container--small">
+        <legend class="slds-text-heading--small 
+          slds-p-vertical--medium">
+          Filter
+        </legend>
+    	<lightning:layout >
+            <lightning:layoutItem padding="around-small" size="6">
+      	      <form class="slds-form--stacked">          
+           		 <lightning:input aura:id="filter" label="filter string"
+                             name="filterString"
+                             value="{!v.filterValue}"
+                             minlength="3"/> 
+          	  <lightning:button label="search" 
+                              class="slds-m-top--medium"
+                              variant="brand"
+                              onclick="{!c.onFilterClick}"/>
+     		</form>
+      	  </lightning:layoutItem>
+  	    </lightning:layout>
+      </fieldset>
+      <!-- / BOXED AREA -->
+    </div>
+    <!-- / CREATE NEW EXPENSE -->
+        </lightning:layoutItem>
+    </lightning:layout>
+<lightning:datatable data="{!v.data}" 
+        columns="{!v.columns}" 
+        keyField="id"
+        hideCheckboxColumn="true"/>
+</aura:component>
