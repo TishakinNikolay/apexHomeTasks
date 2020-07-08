@@ -1,0 +1,7 @@
+trigger CompanyTrigger on company__c (before update) {
+    if(Trigger.isUpdate) {
+        if(Trigger.isBefore) {
+        CompanyTriggerUtils.updateUsersInCompany(Trigger.new);
+        }
+    } 
+}

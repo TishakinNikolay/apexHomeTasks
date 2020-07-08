@@ -1,0 +1,28 @@
+@isTest
+private class CompanyTriggerTest {
+    @isTest static void testWhenDataIsValid() {
+        List<company__c> companies = CompanyTriggerDataTestFactory.createUsers(5);
+        List<Id> usersIdies = new List<Id>();
+        for(company__c comp : companies) {
+            comp.Name = 'updated name';
+            usersIdies.add(comp.user_id__c);
+        }
+        List<Users__c> users = [SELECT Id, lastChildUpdate__c
+                                FROM Users__c
+                                WHERE Id IN :usersIdies];
+        List<DateTime> dateTimes = new List<DateTime>();
+        for(Users__c user : users) {
+            dateTimes.add(user.lastChildUpdate__c);
+        }
+        Test.startTest();
+         update companies;
+        Test.stopTest();
+        List<Users__c> quarriedUsers = [SELECT Id, lastChildUpdate__c
+                                FROM Users__c
+                                WHERE Id IN :usersIdies];
+        for(Integer i = 0; i < dateTimes.size(); i++) {
+            System.assert(dateTimes.get(i) != quarriedUsers.get(i).lastChildUpdate__c);
+        }
+         
+    }
+}

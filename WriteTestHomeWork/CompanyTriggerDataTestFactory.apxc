@@ -1,0 +1,22 @@
+public class CompanyTriggerDataTestFactory {
+    public static List<company__c> createUsers(Integer num) {
+        List<Users__c> users = new List<Users__c>();
+        for(Integer i = 0; i < num; i++) {
+            users.add(new Users__c(
+                 Name='Test user ' + i,
+                 Users_story__c='User test story ' + i,
+                 Birth_moment__c= DateTime.now(),
+                 email__c='test@gmail.com',
+                 phone__c='+396770'));
+        }
+        insert users;
+        List<company__c> result = new List<company__c>();
+        for(Integer i = 0; i < num; i++) {
+            result.add(new company__c(
+                 Name='Test company ' + i,
+                 user_id__c=users.get(i).Id));
+        }
+        insert result;
+        return result;
+    }
+}

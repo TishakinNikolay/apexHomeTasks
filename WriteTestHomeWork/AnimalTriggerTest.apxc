@@ -1,0 +1,24 @@
+@isTest
+private class AnimalTriggerTest {
+    @isTest
+    static void testTriggerWhenAnimalExternalIdIsValid() {
+        //data setup
+  		animal__c newAnimal = new animal__c(name='bird',
+        		                            externalId__c='1');
+        //callout mock setup
+        StaticResourceCalloutMock mock = new StaticResourceCalloutMock();
+        mock.setStaticResource('AnimalHerokuCalloutMock');
+        mock.setStatusCode(200);
+        mock.setHeader('Content-Type', 'application/json;charset=UTF-8');
+        
+        Test.setMock(HttpCalloutMock.class, mock);
+        
+        Test.startTest();
+         Database.SaveResult result = Database.insert(newAnimal,false);
+        Test.stopTest();
+        
+        System.assert(result.success);
+        System.assert(newAnimal.Id != null);
+    }
+  
+}

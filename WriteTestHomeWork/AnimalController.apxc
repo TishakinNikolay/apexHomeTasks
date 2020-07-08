@@ -1,0 +1,22 @@
+public class AnimalController {
+    @AuraEnabled
+    public static List<animal__c> getSameExternalIdAnimals(Id animalId) {
+        System.debug(animalId +' id');
+        animal__c exampleAnimal = [SELECT Id, externalId__c FROM animal__c WHERE Id = :animalId];
+        System.debug(exampleAnimal);
+        List<animal__c> result = [SELECT Id, Name, says__c, eats__c, externalId__c 
+                FROM animal__c 
+                WHERE externalId__c = :exampleAnimal.externalId__c
+                AND Id != :animalId];
+        return result;
+    }
+    @AuraEnabled
+    public static List<animal__c> findAnimals(Id animalId,String filter) {
+        animal__c exampleAnimal = [SELECT Id, externalId__c FROM animal__c WHERE Id = :animalId];
+        List<List<animal__c>> animals = [FIND :filter IN ALL FIELDS 
+                                         RETURNING animal__c(Id,Name,says__c,eats__c,externalId__c
+										 WHERE externalId__c= :exampleAnimal.externalId__c
+                                         AND Id != :animalId)];
+        return animals.get(0);
+    }
+}

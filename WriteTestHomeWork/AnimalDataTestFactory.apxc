@@ -1,0 +1,13 @@
+public class AnimalDataTestFactory {
+    public static List<animal__c> getAnimals(Integer num, String externalId) {
+        List<animal__c> result = new List<animal__c>();
+        for(Integer i = 0; i < num; i++) {
+            result.add(new animal__c(
+              				name='bird ' + i,
+            				externalId__c= externalId));
+        }
+        AnimalTriggerUtils.bBypassTrigger = false;
+        insert result;
+        return result;
+    }
+}

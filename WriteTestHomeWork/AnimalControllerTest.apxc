@@ -1,0 +1,29 @@
+@isTest
+private class AnimalControllerTest {
+    @isTest static void testWhenAnimalWithSameExternalIdExist() {
+         List<animal__c> testDataAnimals = AnimalDataTestFactory.getAnimals(5,'1');
+         animal__c exampleAnimal = testDataAnimals.get(0);
+         Test.startTest();
+         List<animal__c> animals = AnimalController.getSameExternalIdAnimals(exampleAnimal.Id);
+         Test.stopTest();
+         Set<Id> idies = new Set<Id>();
+         for(animal__c anim : animals) {
+            idies.add(anim.Id);
+          }
+         System.assert(idies.contains(exampleAnimal.Id) == false); 
+    }
+    @isTest static void testWhenFindResultsExist() {
+        List<animal__c> testDataAnimals = AnimalDataTestFactory.getAnimals(5,'1');
+         animal__c exampleAnimal = testDataAnimals.get(0);
+         String filter = 'bird';
+         Test.startTest();
+         List<animal__c> animals = AnimalController.findAnimals(exampleAnimal.Id,filter);
+         Test.stopTest();
+         Set<Id> idies = new Set<Id>();
+         for(animal__c anim : animals) {
+            System.assert(anim.Name.indexOf(filter) != -1);
+            idies.add(anim.Id);
+          }
+         System.assert(idies.contains(exampleAnimal.Id) == false);
+    }
+}

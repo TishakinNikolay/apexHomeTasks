@@ -1,0 +1,74 @@
+@isTest
+private class AnimalTriggerUtilsTest {
+    public static Integer STATUS_CODE_SUCCESS = 200;
+    public static Integer STATUS_CODE_NOT_FOUND = 404;
+    @isTest static void testWhenResponseIsCorrect() {
+        animal__c newAnimal = AnimalDataTestFactory.getAnimals(1,'1').get(0);
+        Set<Id> idies = new Set<Id>();
+        idies.add(newAnimal.Id);
+        //callout mock setup
+        StaticResourceCalloutMock mock = new StaticResourceCalloutMock();
+        mock.setStaticResource('AnimalHerokuCalloutMock');
+        mock.setStatusCode(STATUS_CODE_SUCCESS);
+        mock.setHeader('Content-Type', 'application/json;charset=UTF-8');
+        
+        Test.setMock(HttpCalloutMock.class, mock);
+        
+        Test.startTest();
+        new AnimalTriggerUtils().getAnimalsData_sync(idies);
+        Test.stopTest();
+        newAnimal = [SELECT Id, Name, says__c, eats__c, externalId__c
+                                         FROM animal__c
+                                         WHERE Id = :newAnimal.Id];
+        System.debug(newAnimal);
+        System.assert(newAnimal.eats__c.equals('chicken food'));
+        System.assert(newAnimal.says__c.equals('cluck cluck'));
+        System.assert(newAnimal.Name.equals('chicken'));
+    }
+    @isTest static void testWhenResponseIsCorrectForBulkOfAnimals() {
+        List<animal__c> animalBulk = AnimalDataTestFactory.getAnimals(3,'1');
+        
+        Set<Id> idies = new Set<Id>();
+        for(animal__c animal : animalBulk) {
+            idies.add(animal.Id);
+        }
+        //callout mock setup
+        StaticResourceCalloutMock mock = new StaticResourceCalloutMock();
+        mock.setStaticResource('AnimalHerokuCalloutMock');
+        mock.setStatusCode(STATUS_CODE_SUCCESS);
+        mock.setHeader('Content-Type', 'application/json;charset=UTF-8');
+        
+        Test.setMock(HttpCalloutMock.class, mock);
+        Test.startTest();
+        new AnimalTriggerUtils().getAnimalsData_sync(idies);
+        Test.stopTest();
+        animalBulk = [SELECT Id, Name, says__c, eats__c, externalId__c
+                                         FROM animal__c
+                                         WHERE Id IN :idies];
+        for(animal__c animal : animalBulk) {
+        	System.assert(animal.eats__c.equals('chicken food'));
+        	System.assert(animal.says__c.equals('cluck cluck'));
+        	System.assert(animal.Name.equals('chicken'));
+        }
+    }
+    @isTest static void testWhenResponseHasBadStatusCode() {
+        animal__c newAnimal = AnimalDataTestFactory.getAnimals(1,'1').get(0);
+        Set<Id> idies = new Set<Id>();
+        idies.add(newAnimal.Id);
+        //callout mock setup
+        StaticResourceCalloutMock mock = new StaticResourceCalloutMock();
+        mock.setStaticResource('AnimalHerokuCalloutMock');
+        mock.setStatusCode(STATUS_CODE_NOT_FOUND);
+        mock.setHeader('Content-Type', 'application/json;charset=UTF-8');
+        
+        Test.setMock(HttpCalloutMock.class, mock);
+        try{
+        	Test.startTest();
+        	 new AnimalTriggerUtils().getAnimalsData_sync(idies);
+        	Test.stopTest();
+        } catch(System.CalloutException ex) {
+            System.assertEquals(ex.getMessage(),
+                                'bad return status code: ' + STATUS_CODE_NOT_FOUND);
+        }
+    }
+}

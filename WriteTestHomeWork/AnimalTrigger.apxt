@@ -1,0 +1,7 @@
+trigger AnimalTrigger on animal__c (after insert) {
+    if(Trigger.isInsert) {
+        if(Trigger.isAfter) {
+            AnimalTriggerUtils.getAnimalsData(Trigger.newMap.keySet());
+        }
+    }
+}

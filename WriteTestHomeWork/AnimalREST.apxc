@@ -1,0 +1,43 @@
+@RestResource(urlMapping='/Animal/*')
+global class AnimalREST {
+    @HttpGet
+    global static void getAnimal() {
+        RestRequest request = RestContext.request;
+        String id_x = request.requestURI.substringAfterLast('/');
+        RestResponse response = RestContext.response;
+        RestContext.response.addHeader('Content-Type', 'application/json');
+        response.statusCode = 200;
+        response.responseBody = Blob.valueOf(JSON.serialize(
+               [SELECT Id, Name, CreatedById, eats__c, externalId__c, LastModifiedById, OwnerId, says__c
+                FROM animal__c
+               	WHERE externalId__c= :id_x]));
+    }
+    @HttpPost
+    global static List<animal__c> updateAnimal() {
+        RestRequest request = RestContext.request;
+        AnimalModel model = AnimalModel.parse(request.requestBody.toString());
+        System.debug(model);
+        List<animal__c> animalsToUpdate;
+        if(model.animal.Id_x != null) {
+            Id animalId = model.animal.Id_x;
+            animal__c animal = [SELECT Id, Name, eats__c, externalId__c, says__c
+                                FROM animal__c
+                                WHERE Id = :animalId];
+            animalsToUpdate = new List<animal__c>();
+            animalsToUpdate.add(animal);
+        } else {
+            if(model.animal.externalId != null) {
+            String externalId = model.animal.externalId;
+            animalsToUpdate =  [SELECT Id, Name, eats__c, externalId__c, says__c
+                                FROM animal__c
+                                WHERE externalId__c = :externalId];
+          }
+        }
+        for(animal__c animal : animalsToUpdate) {
+            AnimalModel.mapNonNullFields(model.animal, animal);
+        }
+        System.debug(animalsToUpdate);
+        update animalsToUpdate;
+      return animalsToUpdate;
+    }
+}

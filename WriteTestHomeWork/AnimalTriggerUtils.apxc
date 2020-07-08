@@ -1,0 +1,48 @@
+public class AnimalTriggerUtils {
+    public static Boolean bBypassTrigger = true;
+    @Future(callout=true)
+    public static void getAnimalsData_asycn(Set<Id> idies) {
+        if(bBypassTrigger) {
+        	new AnimalTriggerUtils().getAnimalsData_sync(idies);
+        } else {
+            bBypassTrigger = true;
+        }
+    }
+  //synchronous function 
+    public void getAnimalsData_sync(Set<Id> idies) {
+      Http http = new Http();
+      Map<String,AnimalModel> models = new Map<String,AnimalModel>();
+      List<animal__c> customAnimals = [SELECT Name, says__c, eats__c, externalId__c
+                                         FROM animal__c
+                                         WHERE Id IN :idies
+                                         AND externalId__c != null];
+      for(animal__c animal : customAnimals) {
+          String externalId = animal.externalId__c;
+          if(models.keySet().contains(externalId) == false) { // check if models already has a model with given external id
+            AnimalModel model = getModelById(externalId,http);
+            models.put(externalId,model);
+          }
+          AnimalModel.mapNonNullFields(models.get(externalId).animal, animal);
+      }
+      update customAnimals;
+	}
+  public static AnimalModel getModelById(String identifer, Http http) {
+    HttpResponse response = http.send(getRequestById(identifer));
+    AnimalModel model;
+      if(response.getStatusCode() == 200) {
+          String body = response.getBody()
+              .replace('"id"','"id_x"');
+          model = AnimalModel.parse(body);
+      } else {
+          throw new CalloutException('bad return status code: ' + response.getStatusCode());
+      }
+      return model;
+  } 
+  public static HttpRequest getRequestById(String identifier) {
+      HttpRequest result = new HttpRequest();
+      String endPoint = 'https://th-apex-http-callout.herokuapp.com/animals/';
+  	  result.setEndpoint(endPoint + identifier);
+  	  result.setMethod('GET');	
+      return result;
+  }
+}
