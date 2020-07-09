@@ -1,0 +1,27 @@
+<template>
+    <lightning-card title="Search_Animals" icon-name="custom:custom14">
+      <div class="slds-m-around_medium">
+        <lightning-input label="externalId" required></lightning-input>
+        <lightning-button label="Get Animal" onclick={searchAnimals}></lightning-button>
+      </div>
+    </lightning-card>
+    
+      <div class="slds-m-around_medium">
+        <template if:true={objects}>
+          <template for:each={objects} for:item="object">
+            <lightning-card key={object.Id}  style="padding: 4%;">
+            <p key={object.Id} class="slds-text-heading--medium slds-p-rizontal--small">
+              Name: {object.Name}
+            </p>
+            <p key={object.Id} class="slds-text-heading--medium slds-p-rizontal--small">
+              Eats: {object.eats__c}
+            </p>
+            <p key={object.Id} class="slds-text-heading--medium slds-p-rizontal--small">
+              Says: {object.says__c}
+            </p>
+           </lightning-card>
+          </template>
+        </template>
+        </div>
+  </template>
+      
